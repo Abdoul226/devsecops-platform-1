@@ -5,3 +5,18 @@
 crash.log
 *.log
 .DS_Store
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+.terraform.lock.hcl
+
+# Terraform vars (souvent sensibles)
+*.tfvars
+*.tfvars.json
+
+# CLI config
+.terraformrc
+terraform.rc
