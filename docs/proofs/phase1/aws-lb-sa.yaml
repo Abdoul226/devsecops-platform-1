@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::418884735655:role/eksctl-cn-devsec-dev-addon-iamserviceaccount--Role1-lxtv8Y5jIizC
+  creationTimestamp: "2026-01-25T17:21:50Z"
+  labels:
+    app.kubernetes.io/managed-by: eksctl
+  name: aws-load-balancer-controller
+  namespace: kube-system
+  resourceVersion: "15621"
+  uid: 47ca3157-9e78-4717-8e5f-a8cb552d1d72

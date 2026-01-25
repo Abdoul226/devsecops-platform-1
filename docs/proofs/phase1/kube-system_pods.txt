@@ -1,0 +1,9 @@
+NAME                                            READY   STATUS    RESTARTS   AGE    IP             NODE                                        NOMINATED NODE   READINESS GATES
+aws-load-balancer-controller-5fb86f8bf6-6hc54   1/1     Running   0          13m    10.0.155.228   ip-10-0-144-12.eu-west-3.compute.internal   <none>           <none>
+aws-load-balancer-controller-5fb86f8bf6-qtlk8   1/1     Running   0          13m    10.0.140.194   ip-10-0-133-63.eu-west-3.compute.internal   <none>           <none>
+aws-node-snnz2                                  2/2     Running   0          102m   10.0.133.63    ip-10-0-133-63.eu-west-3.compute.internal   <none>           <none>
+aws-node-v6jxd                                  2/2     Running   0          102m   10.0.144.12    ip-10-0-144-12.eu-west-3.compute.internal   <none>           <none>
+coredns-86cc5cb7c8-jsjml                        1/1     Running   0          106m   10.0.130.244   ip-10-0-133-63.eu-west-3.compute.internal   <none>           <none>
+coredns-86cc5cb7c8-rqbxr                        1/1     Running   0          106m   10.0.133.29    ip-10-0-133-63.eu-west-3.compute.internal   <none>           <none>
+kube-proxy-h5vgg                                1/1     Running   0          102m   10.0.144.12    ip-10-0-144-12.eu-west-3.compute.internal   <none>           <none>
+kube-proxy-t8fbb                                1/1     Running   0          102m   10.0.133.63    ip-10-0-133-63.eu-west-3.compute.internal   <none>           <none>
