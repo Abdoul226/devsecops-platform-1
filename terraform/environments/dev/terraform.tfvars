@@ -1,0 +1,6 @@
+aws_region          = "eu-west-3"
+project_name        = "cloud-native-devsecops-platform"
+environment         = "dev"
+cluster_version     = "1.29"
+name_prefix         = "cn-devsec"
+admin_principal_arn = "arn:aws:iam::418884735655:user/abdoul-devops"
