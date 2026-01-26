@@ -27,3 +27,16 @@ module "eks" {
   admin_principal_arn = var.admin_principal_arn
 }
 
+module "tooling" {
+  source = "../../modules/tooling-ec2"
+
+  name             = local.name
+  vpc_id           = module.vpc.vpc_id
+  public_subnet_id = module.vpc.public_subnet_ids[0]
+
+  # Recommandation: laisse [] et utilise SSM (aucun port ouvert)
+  allowed_ingress_cidrs = []
+
+  tags = local.tags
+}
+
