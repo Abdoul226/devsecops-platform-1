@@ -40,3 +40,14 @@ module "tooling" {
   tags = local.tags
 }
 
+resource "aws_security_group_rule" "tooling_to_eks_api" {
+  type        = "ingress"
+  description = "Allow Tooling EC2 to access EKS API (443)"
+  from_port   = 443
+  to_port     = 443
+  protocol    = "tcp"
+
+  security_group_id        = module.eks.cluster_security_group_id
+  source_security_group_id = module.tooling.security_group_id
+}
+
