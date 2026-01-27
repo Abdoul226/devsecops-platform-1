@@ -1,0 +1,3 @@
+NAME       SYNC STATUS   HEALTH STATUS   REVISION                                   PROJECT
+hello      Synced        Healthy         14919cdd0a473f24408a1cab965a631632923f89   default
+root-app   Synced        Healthy         9c34aa63b88b63ad86d46d1e7ccfb1453cce1098   default

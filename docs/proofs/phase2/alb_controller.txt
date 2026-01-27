@@ -1,0 +1,2 @@
+aws-load-balancer-controller-5fb86f8bf6-6hc54   1/1     Running   0          46h
+aws-load-balancer-controller-5fb86f8bf6-qtlk8   1/1     Running   0          46h

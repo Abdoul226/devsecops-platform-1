@@ -1,0 +1,2 @@
+NAME    CLASS    HOSTS   ADDRESS                                                             PORTS   AGE
+hello   <none>   *       k8s-hello-hello-b65cf30c3f-2083889961.eu-west-3.elb.amazonaws.com   80      8m48s
