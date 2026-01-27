@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: hello
-        image: nginx:stable
+        image: 418884735655.dkr.ecr.eu-west-3.amazonaws.com/hello-app:v0.1.0
         ports:
         - containerPort: 80
         readinessProbe:

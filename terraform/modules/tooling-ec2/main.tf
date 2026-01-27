@@ -98,3 +98,8 @@ resource "aws_instance" "tooling" {
   })
 }
 
+resource "aws_iam_role_policy_attachment" "ecr_poweruser" {
+  role       = aws_iam_role.ssm_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"
+}
+
