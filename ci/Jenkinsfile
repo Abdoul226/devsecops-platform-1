@@ -1,5 +1,6 @@
 pipeline {
   agent any
+  options { timestamps() }
 
   environment {
     AWS_REGION   = 'eu-west-3'
@@ -21,58 +22,67 @@ pipeline {
       }
     }
 
-    stage('SonarQube') {
+    stage('SonarQube Analysis') {
       steps {
         withSonarQubeEnv('sonarqube') {
-          sh '''
-          sonar-scanner \
-            -Dsonar.projectKey=hello-app \
-            -Dsonar.sources=app/hello-app \
-            -Dsonar.host.url=http://sonarqube:9000
-          '''
+          sh """
+            sonar-scanner \
+              -Dsonar.projectKey=hello-app \
+              -Dsonar.sources=app/hello-app \
+              -Dsonar.host.url=http://sonarqube:9000
+          """
+        }
+      }
+    }
+
+    stage('Quality Gate') {
+      steps {
+        timeout(time: 5, unit: 'MINUTES') {
+          waitForQualityGate abortPipeline: true
         }
       }
     }
 
     stage('Build Image') {
       steps {
-        sh '''
+        sh """
           cd app/hello-app
           docker build -t ${IMAGE} .
-        '''
+        """
       }
     }
 
     stage('Trivy Scan Image') {
       steps {
-        sh 'trivy image --exit-code 1 --severity HIGH,CRITICAL ${IMAGE}'
+        sh 'trivy image --no-progress --exit-code 1 --severity HIGH,CRITICAL ${IMAGE}'
       }
     }
 
     stage('Login & Push to ECR') {
       steps {
-        sh '''
+        sh """
           aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}
           docker push ${IMAGE}
-        '''
+        """
       }
     }
 
     stage('Update GitOps image tag') {
       steps {
-        sh '''
-          set -e
+        sh """
+          set -euo pipefail
           git config user.email "jenkins@local"
           git config user.name "jenkins"
 
-          # Exemple: si ton GitOps est dans le même repo, sinon on clone un repo dédié.
-          sed -i "s#${AWS_ACCOUNT}\\.dkr\\.ecr\\.${AWS_REGION}\\.amazonaws\\.com/${ECR_REPO}:v0\\.1\\.[0-9]\\+#${IMAGE}#g" gitops/apps/hello/manifests.yaml || true
-          sed -i "s#${AWS_ACCOUNT}\\.dkr\\.ecr\\.${AWS_REGION}\\.amazonaws\\.com/${ECR_REPO}:v0\\.1\\.[0-9]\\+#${IMAGE}#g" gitops/apps/hello/manifests.yaml
+          FILE="gitops/apps/hello/manifests.yaml"
 
-          git add gitops/apps/hello/manifests.yaml
+          # Remplace la ligne image: .../hello-app:<tag> par la nouvelle image
+          sed -i "s#^\\s*image: ${ECR_REGISTRY}/${ECR_REPO}:.*#        image: ${IMAGE}#g" \$FILE
+
+          git add \$FILE
           git commit -m "ci: bump hello-app image to ${IMAGE_TAG}" || true
           git push
-        '''
+        """
       }
     }
   }
