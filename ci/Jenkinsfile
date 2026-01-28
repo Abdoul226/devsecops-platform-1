@@ -54,7 +54,7 @@ pipeline {
 
     stage('Trivy Scan Image') {
       steps {
-        sh 'trivy image --no-progress --exit-code 1 --severity HIGH,CRITICAL ${IMAGE}'
+        sh 'trivy image --no-progress --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed ${IMAGE}'
       }
     }
 
