@@ -81,7 +81,10 @@ pipeline {
 
           git add \$FILE
           git commit -m "ci: bump hello-app image to ${IMAGE_TAG}" || true
-          git push origin HEAD:main
+
+          # push via HTTPS + token
+          git remote set-url origin https://\${GIT_USER}:\${GIT_TOKEN}@github.com/Abdoul226/devsecops-platform-1.git
+          git push origin HEAD:main          
         """
       }
     }
