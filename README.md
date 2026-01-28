@@ -123,6 +123,226 @@ It is designed as a **portfolio-grade project** for DevOps / Cloud / Platform En
 
 ---
 
+## ▶️ How to Run & Reproduce the Project
+
+This section explains how to reproduce the platform from scratch in a local AWS account.
+
+### 1️⃣ Prerequisites
+
+* AWS account
+* AWS CLI configured (`aws configure`)
+* Terraform >= 1.4
+* kubectl
+* Docker
+* Git
+
+---
+
+### 2️⃣ Provision Infrastructure (Terraform)
+
+From the repository root:
+
+```bash
+cd terraform/environments/dev
+terraform init
+terraform apply
+```
+
+This provisions:
+
+* VPC
+* EKS cluster
+* Managed node group
+* IAM roles and security groups
+
+---
+
+### 3️⃣ Access the Tooling VM (SSM)
+
+```bash
+aws ssm start-session --target <TOOLING_EC2_ID> --region eu-west-3
+```
+
+The tooling VM hosts:
+
+* Jenkins
+* SonarQube
+
+---
+
+### 4️⃣ Start Tooling Services
+
+```bash
+cd /opt/tooling
+docker compose up -d
+```
+
+Services:
+
+* Jenkins: [http://localhost:8080](http://localhost:8080)
+* SonarQube: [http://localhost:9000](http://localhost:9000)
+
+(Accessed via SSM port-forwarding)
+
+---
+
+### 5️⃣ Configure Jenkins
+
+* Create a Pipeline job (Pipeline from SCM)
+* Point to this repository
+* Jenkinsfile path: `ci/Jenkinsfile`
+* Add credentials:
+
+  * AWS credentials (for ECR)
+  * GitHub PAT (for GitOps push)
+
+---
+
+### 6️⃣ Configure SonarQube
+
+* First login to SonarQube UI
+* Create a project: `hello-app`
+* Generate a token if needed
+* Configure webhook:
+
+```
+http://jenkins:8080/sonarqube-webhook/
+```
+
+---
+
+### 7️⃣ Deploy Argo CD
+
+```bash
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+```
+
+Expose Argo CD (port-forward or Ingress).
+
+---
+
+### 8️⃣ Run the Pipeline
+
+* Push code to GitHub **or** click "Build Now" in Jenkins
+* Observe pipeline stages:
+
+  * Tests
+  * SonarQube + Quality Gate
+  * Trivy scan
+  * Image push to ECR
+  * GitOps manifest update
+
+---
+
+### 9️⃣ Validate Deployment
+
+```bash
+kubectl -n argocd get applications
+kubectl -n hello get pods
+kubectl -n hello get ingress
+```
+
+Access the application via the AWS ALB DNS name.
+
+---
+
+### 🔁 Rollback Strategy
+
+Rollback is Git-driven:
+
+```bash
+git revert <gitops-commit>
+git push
+```
+
+Argo CD automatically synchronizes the previous state.
+
+---
+
+## ▶️ How to Run (Quickstart)
+
+This section provides a minimal set of steps to **reproduce the platform**.
+
+### 1) Provision AWS infrastructure (Terraform)
+
+From your local workstation:
+
+```bash
+cd terraform/environments/dev
+terraform init
+terraform plan
+terraform apply
+```
+
+Configure kubectl:
+
+```bash
+aws eks update-kubeconfig --region eu-west-3 --name cn-devsec-dev
+kubectl get nodes
+```
+
+### 2) Access the Tooling EC2 securely (SSM)
+
+```bash
+aws ssm start-session --region eu-west-3 --target <TOOLING_INSTANCE_ID>
+```
+
+Port-forward Jenkins (8080):
+
+```bash
+aws ssm start-session \
+  --region eu-west-3 \
+  --target <TOOLING_INSTANCE_ID> \
+  --document-name AWS-StartPortForwardingSession \
+  --parameters '{"portNumber":["8080"],"localPortNumber":["8080"]}'
+```
+
+Open: `http://localhost:8080`
+
+Port-forward SonarQube (9000):
+
+```bash
+aws ssm start-session \
+  --region eu-west-3 \
+  --target <TOOLING_INSTANCE_ID> \
+  --document-name AWS-StartPortForwardingSession \
+  --parameters '{"portNumber":["9000"],"localPortNumber":["9000"]}'
+```
+
+Open: `http://localhost:9000`
+
+### 3) Install Argo CD (EKS)
+
+```bash
+helm repo add argo https://argoproj.github.io/argo-helm
+helm repo update
+kubectl create namespace argocd || true
+helm upgrade --install argocd argo/argo-cd -n argocd
+kubectl -n argocd get pods
+```
+
+### 4) Deploy the GitOps root app
+
+```bash
+kubectl apply -f gitops/argocd/root-app.yaml
+kubectl -n argocd get applications
+```
+
+### 5) Run the pipeline
+
+* Jenkins job is configured as **Pipeline from SCM** using `ci/Jenkinsfile`
+* Trigger a build (Build Now)
+* Validate deployment:
+
+```bash
+kubectl -n argocd get applications
+kubectl -n hello rollout status deploy/hello
+kubectl -n hello get deploy hello -o=jsonpath='{.spec.template.spec.containers[0].image}'; echo
+```
+
+---
+
 ## 🚀 Future Improvements
 
 * Multi-environment support (dev / staging / prod)
