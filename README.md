@@ -343,6 +343,111 @@ kubectl -n hello get deploy hello -o=jsonpath='{.spec.template.spec.containers[0
 
 ---
 
+## 🧰 Troubleshooting (Common Issues)
+
+This section lists **real-world issues** encountered during the project and how they were resolved.
+
+### 1) Jenkins cannot push to GitHub (detached HEAD)
+
+**Error**: `fatal: You are not currently on a branch`
+
+**Cause**: Jenkins checks out the repository in *detached HEAD* mode.
+
+**Fix**:
+
+```bash
+git push origin HEAD:main
+```
+
+Or explicitly push using HTTPS + PAT from Jenkins.
+
+---
+
+### 2) Jenkins cannot authenticate to GitHub
+
+**Error**: `could not read Username for 'https://github.com'`
+
+**Cause**: Jenkins cannot prompt for credentials.
+
+**Fix**:
+
+* Create a GitHub Personal Access Token (PAT)
+* Store it in Jenkins Credentials
+* Inject it using `withCredentials(...)`
+
+---
+
+### 3) SonarQube Quality Gate stage hangs
+
+**Cause**: SonarQube webhook is not configured.
+
+**Fix**:
+Configure webhook in SonarQube:
+
+```
+http://jenkins:8080/sonarqube-webhook/
+```
+
+This allows Jenkins to receive Quality Gate results.
+
+---
+
+### 4) Trivy blocks the pipeline with many vulnerabilities
+
+**Cause**: Base image contains OS-level CVEs without available fixes.
+
+**Fix**:
+
+* Use smaller base images (e.g. `nginx:alpine`)
+* Use `--ignore-unfixed` to reflect realistic security policies
+
+---
+
+### 5) Kubernetes ImagePullBackOff from ECR
+
+**Cause**:
+
+* Image tag does not exist in ECR, or
+* Node IAM role lacks ECR permissions
+
+**Fix**:
+
+* Ensure image is pushed before deployment
+* Verify node role has `AmazonEC2ContainerRegistryReadOnly`
+
+---
+
+### 6) SonarQube UI not accessible
+
+**Cause**: SSM port-forwarding session not active.
+
+**Fix**:
+Restart port-forward:
+
+```bash
+aws ssm start-session \
+  --region eu-west-3 \
+  --target <TOOLING_INSTANCE_ID> \
+  --document-name AWS-StartPortForwardingSession \
+  --parameters '{"portNumber":["9000"],"localPortNumber":["9000"]}'
+```
+
+---
+
+### 7) Disk full on Tooling EC2
+
+**Cause**: Docker images and layers fill the root filesystem.
+
+**Fix**:
+
+```bash
+docker system prune -af
+```
+
+Or increase the EBS volume size.
+
+---
+
 ## 🚀 Future Improvements
 
 * Multi-environment support (dev / staging / prod)
