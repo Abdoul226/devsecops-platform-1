@@ -9,6 +9,10 @@ pipeline {
     IMAGE_TAG    = "v0.1.${BUILD_NUMBER}"
     ECR_REGISTRY = "${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com"
     IMAGE        = "${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}"
+
+    // Repo GitHub (même repo)
+    GIT_REPO_URL = 'https://github.com/Abdoul226/devsecops-platform-1.git'
+    GIT_BRANCH   = 'main'
   }
 
   stages {
@@ -69,23 +73,28 @@ pipeline {
 
     stage('Update GitOps image tag') {
       steps {
-        sh """
-          set -euo pipefail
-          git config user.email "jenkins@local"
-          git config user.name "jenkins"
+        // Jenkins Credentials: Username with password
+        // - ID: github-pat
+        // - Username: ton user GitHub
+        // - Password: ton PAT
+        withCredentials([usernamePassword(credentialsId: 'github-pat', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
+          sh """
+            set -euo pipefail
+            git config user.email "jenkins@local"
+            git config user.name "jenkins"
 
-          FILE="gitops/apps/hello/manifests.yaml"
+            FILE="gitops/apps/hello/manifests.yaml"
 
-          # Remplace la ligne image: .../hello-app:<tag> par la nouvelle image
-          sed -i "s#^\\s*image: ${ECR_REGISTRY}/${ECR_REPO}:.*#        image: ${IMAGE}#g" \$FILE
+            # Remplace la ligne image: .../hello-app:<tag> par la nouvelle image
+            sed -i "s#^\\s*image: ${ECR_REGISTRY}/${ECR_REPO}:.*#        image: ${IMAGE}#g" \$FILE
 
-          git add \$FILE
-          git commit -m "ci: bump hello-app image to ${IMAGE_TAG}" || true
+            git add \$FILE
+            git commit -m "ci: bump hello-app image to ${IMAGE_TAG}" || true
 
-          # push via HTTPS + token
-          git remote set-url origin https://\${GIT_USER}:\${GIT_TOKEN}@github.com/Abdoul226/devsecops-platform-1.git
-          git push origin HEAD:main          
-        """
+            # Push depuis detached HEAD vers main, via HTTPS + PAT (pas de prompt interactif)
+            git push https://\${GIT_USER}:\${GIT_TOKEN}@github.com/Abdoul226/devsecops-platform-1.git HEAD:${GIT_BRANCH}
+          """
+        }
       }
     }
   }
