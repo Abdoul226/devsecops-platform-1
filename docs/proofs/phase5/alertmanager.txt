@@ -1,0 +1,2 @@
+NAME                                      VERSION   REPLICAS   READY   RECONCILED   AVAILABLE   AGE
+kube-prometheus-kube-prome-alertmanager   v0.30.1   1          1       True         True        23m

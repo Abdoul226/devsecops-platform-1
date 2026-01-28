@@ -1,0 +1,8 @@
+NAME                                                     READY   STATUS    RESTARTS   AGE   IP             NODE                                        NOMINATED NODE   READINESS GATES
+alertmanager-kube-prometheus-kube-prome-alertmanager-0   2/2     Running   0          23m   10.0.142.139   ip-10-0-133-63.eu-west-3.compute.internal   <none>           <none>
+kube-prometheus-grafana-74b5f7d-mrwzm                    3/3     Running   0          23m   10.0.133.167   ip-10-0-133-63.eu-west-3.compute.internal   <none>           <none>
+kube-prometheus-kube-prome-operator-7db4978469-rjz9f     1/1     Running   0          23m   10.0.146.242   ip-10-0-144-12.eu-west-3.compute.internal   <none>           <none>
+kube-prometheus-kube-state-metrics-66c454fc7d-ngscw      1/1     Running   0          23m   10.0.148.125   ip-10-0-144-12.eu-west-3.compute.internal   <none>           <none>
+kube-prometheus-prometheus-node-exporter-ns58g           1/1     Running   0          23m   10.0.133.63    ip-10-0-133-63.eu-west-3.compute.internal   <none>           <none>
+kube-prometheus-prometheus-node-exporter-s48zm           1/1     Running   0          23m   10.0.144.12    ip-10-0-144-12.eu-west-3.compute.internal   <none>           <none>
+prometheus-kube-prometheus-kube-prome-prometheus-0       2/2     Running   0          23m   10.0.145.154   ip-10-0-144-12.eu-west-3.compute.internal   <none>           <none>
