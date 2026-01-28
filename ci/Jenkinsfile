@@ -81,7 +81,7 @@ pipeline {
 
           git add \$FILE
           git commit -m "ci: bump hello-app image to ${IMAGE_TAG}" || true
-          git push
+          git push origin HEAD:main
         """
       }
     }
